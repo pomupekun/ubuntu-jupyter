@@ -5,6 +5,7 @@ ENV PATH=/opt/conda/bin:/usr/local/lib/node_modules/ijavascript/bin:$PATH
 # miniconda and jupyter
 RUN apt-get update && apt-get upgrade -y && \
 	apt-get install -y \
+		apt-utils \
 		libzmq3-dev \
 		bzip2 \
 		wget && \
@@ -32,7 +33,7 @@ RUN apt-get install -y \
 		nodejs-legacy \
 		python-dev && \
 	npm install -y ijavascript && \
-	ijs --ijs-install-kernel
+	ijavascript --ijs-install-kernel
 
 # PHP
 RUN apt-get install -y \
