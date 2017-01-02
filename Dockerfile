@@ -1,6 +1,5 @@
 FROM ubuntu:zesty
 MAINTAINER pomupekun<pomupekun.gmail.com>
-
 ENV PATH=/opt/conda/bin:/usr/local/lib/node_modules/ijavascript/bin:$PATH
 
 # miniconda and jupyter
@@ -14,20 +13,13 @@ RUN apt-get update && apt-get upgrade -y && \
 	conda update -y --all && \
 	conda install -y \
 		jupyter && \
+	pip install jupyterlab && \
 	rm /tmp/install_miniconda.sh
 
 # python packages
 RUN conda install -y \
 		opencv \
 		matplotlib
-
-# repogitory
-#RUN apt-get install -y apt-file && \
-#	apt-file update && \
-#	apt-file search add-apt-repository && \
-#	apt-get install software-properties-common && \
-#	apt-get update && \
-#	add-apt-repository ppa:chronitis/jupyter -y
 
 # Julia kernel
 RUN apt-get install -y \
@@ -39,7 +31,8 @@ RUN apt-get install -y \
 		npm \
 		nodejs-legacy \
 		python-dev && \
-	npm install ijavascript
+	npm install -y ijavascript && \
+	ijs --ijs-install-kernel
 
 # PHP
 RUN apt-get install -y \

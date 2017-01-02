@@ -1,6 +1,6 @@
 ubuntu-jupyter:
   #build: .
-  image: "ubuntu-jupyter:latest"
+  image: "ubuntu-jupyter:devel"
   ports:
     - "8888:8888"
   container_name: ubuntu-jupyter
