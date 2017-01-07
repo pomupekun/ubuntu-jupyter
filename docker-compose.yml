@@ -7,7 +7,7 @@ ubuntu-jupyter:
   tty: true
   stdin_open: true
   environment:
-    ENV: PROD
+    ENV: LAB
   volumes:
     - ~/notebook:/jupyter/notebook
     - ./conf:/jupyter/conf
