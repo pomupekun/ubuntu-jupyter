@@ -45,7 +45,7 @@ RUN apt-get clean && \
 
 # python packages
 RUN conda install -y \
-	-c https://conda.binstar.org/menpo opencv3 \
+		-c https://conda.binstar.org/menpo opencv3 \
 		matplotlib \
 		numpy
 
@@ -55,5 +55,7 @@ RUN conda install -y -c \
 		jupyter_nbextensions_configurator \
 		jupyter_contrib_nbextensions
 
-CMD ["/jupyter/conf/cmd.sh"]
+
+ENTRYPOINT ["jupyter"]
+CMD ["lab", "--ip=0.0.0.0"]
 
