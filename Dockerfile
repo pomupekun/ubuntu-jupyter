@@ -18,9 +18,9 @@ RUN apt-get update && \
 	rm /tmp/install_miniconda.sh
 
 # Julia kernel
-RUN apt-get install -y \
-		julia && \
-	julia -e 'Pkg.add("IJulia")'
+#RUN apt-get install -y \
+#		julia && \
+#	julia -e 'Pkg.add("IJulia")'
 
 # Node.js kernel
 RUN apt-get clean && \
@@ -33,20 +33,21 @@ RUN apt-get clean && \
 	npm install -y -g ijavascript && \
 	ijavascript.js --ijs-install-kernel
 
-# PHP
-RUN apt-get install -y \
-		curl \
-		php \
-		php-zmq && \
-	wget -q https://litipk.github.io/Jupyter-PHP-Installer/dist/jupyter-php-installer.phar -O /tmp/install_jupyter-php.phar && \
-	curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin && \
-	php /tmp/install_jupyter-php.phar install && \
-	rm /tmp/install_jupyter-php.phar
+## PHP kernel
+#RUN apt-get install -y \
+#		curl \
+#		php \
+#		php-zmq && \
+#	wget -q https://litipk.github.io/Jupyter-PHP-Installer/dist/jupyter-php-installer.phar -O /tmp/install_jupyter-php.phar && \
+#	curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin && \
+#	php /tmp/install_jupyter-php.phar install && \
+#	rm /tmp/install_jupyter-php.phar
 
 # python packages
 RUN conda install -y \
-		opencv \
-		matplotlib
+	-c https://conda.binstar.org/menpo opencv3 \
+		matplotlib \
+		numpy
 
 # jupyter extensions
 RUN conda install -y -c \
