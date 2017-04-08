@@ -55,7 +55,26 @@ RUN conda install -y -c \
 		jupyter_nbextensions_configurator \
 		jupyter_contrib_nbextensions
 
+RUN apt-get clean && \
+	apt-get update -y && \
+	apt-get install -y \
+		curl
 
-ENTRYPOINT ["jupyter"]
-CMD ["lab", "--ip=0.0.0.0"]
+#ENV TINI_VERSION v0.14.0
+#ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+#RUN chmod +x /tini
+
+ENV PATH=/usr/local/bin:$PATH
+RUN curl -L https://github.com/krallin/tini/releases/download/v0.14.0/tini -o /usr/local/bin/tini && \
+	chmod +x /usr/local/bin/tini
+
+RUN pip install jupyterthemes && \
+	jt -t onedork -vim -fs 10 -nfs 11 -tfs 11
+
+RUN apt-get clean && apt-get update -y && apt-get install -y libgtk2.0-0
+
+#RUN jupyter serverextension enable --py jupyterlab --sys-prefix
+
+ENTRYPOINT ["tini", "--", "jupyter"]
+CMD ["--ip=0.0.0.0"]
 
