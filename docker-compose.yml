@@ -1,14 +1,14 @@
 ubuntu-jupyter:
-  #build: .
-  image: "ubuntu-jupyter:devel"
+  #image: "pomupekun/ubuntu-jupyter:latest"
+  image: "ubuntu-jupyter:latest"
   ports:
     - "8888:8888"
   container_name: ubuntu-jupyter
-  tty: true
-  stdin_open: true
-  environment:
-    ENV: LAB
+  #tty: true
+  #stdin_open: true
   volumes:
-    - ~/notebook:/jupyter/notebook
-    - ./conf:/jupyter/conf
+     - ~/jupyter:/jupyter
+  command: ["notebook", "--ip=0.0.0.0", "--allow-root", "--notebook-dir=/jupyter/notebooks", "--config=/jupyter/conf/jupyter_notebook_config.py"]
+  #command: ["notebook", "--ip=0.0.0.0", "--notebook-dir=/jupyter/notebooks"]
+
 

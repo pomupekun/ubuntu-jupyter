@@ -1,0 +1,14 @@
+ubuntu-jupyter:
+  #image: "pomupekun/ubuntu-jupyter:latest"
+  image: "ubuntu-jupyter:latest"
+  ports:
+    - "8888:8888"
+  container_name: ubuntu-jupyter
+  #tty: true
+  #stdin_open: true
+  volumes:
+     - ~/jupyter:/jupyter
+  entrypoint:
+    - ""
+  command: tail -f /dev/null
+
