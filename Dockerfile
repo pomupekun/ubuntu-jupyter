@@ -1,10 +1,7 @@
 FROM ubuntu:zesty
 MAINTAINER pomupekun<pomupekun.gmail.com>
 # ENV PATH=/opt/conda/bin:/usr/local/lib/node_modules/ijavascript/bin:$PATH
-# ENV PATH=/opt/conda/bin:/usr/local/src/cling/bin:$PATH
 ENV PATH=/usr/local/bin:/opt/conda/bin:/usr/local/src/cling/bin:$PATH
-
-# PATH=/usr/local/src/cling/bin:$PATH
 
 # common packages for build kernels
 RUN apt-get update \
@@ -104,26 +101,36 @@ RUN curl -L https://github.com/krallin/tini/releases/download/v0.14.0/tini -o /u
 # python packages
 RUN conda install -c https://conda.binstar.org/menpo -y \
 		opencv3 \
+ && conda install -y \
 		matplotlib \
-		numpy
+		numpy \
+		seaborn
 
 # jupyter extensions
-RUN conda install -y -c conda-forge \
-		jupyter_nbextensions_configurator \
-		jupyter_contrib_nbextensions \
-		ipyparallel \
- &&	pip install jupyterthemes
+# RUN conda install -y -c conda-forge \
+# 		jupyter_nbextensions_configurator \
+# 		jupyter_contrib_nbextensions \
+# 		ipyparallel \
+#  &&	pip install jupyterthemes
 
-#RUN jupyter serverextension enable --py jupyterlab --sys-prefix
+
+RUN pip install \
+		jupyter-js-widgets-nbextension \
+		jupyter_contrib_nbextensions \
+		jupyter_nbextensions_configurator \
+		ipyparallel \
+		jupyterthemes
+
+# RUN jupyter serverextension enable --py jupyterlab --sys-prefix
 
 # jupyter setting
-RUN jt -t onedork -vim -fs 10 -nfs 11 -tfs 11 \
+RUN jt -t onedork -vim -fs 10 -nfs 10 -tfs 10 \
  && ipcluster nbextension enable \
+ && jupyter nbextensions_configurator enable \
  &&	jupyter nbextension enable --py --sys-prefix widgetsnbextension \
- && jupyter nbextensions_configurator enable
-
-
+ && jupyter contrib nbextension install
 
 ENTRYPOINT ["tini", "--", "jupyter"]
 CMD ["--allow-root", "--ip=0.0.0.0"]
+
 
