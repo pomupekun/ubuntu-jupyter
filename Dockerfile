@@ -6,36 +6,63 @@ ENV PATH=/usr/local/bin:/opt/conda/bin:/usr/local/src/cling/bin:$PATH
 RUN apt-get update \
  && apt-get upgrade -y \
  && apt-get install -y \
-		wget \
-		curl \
 		bzip2 \
+		curl \
 		git \
-		unzip \
+		libgtk2.0-0 \
 		libzmq3-dev \
 		python-dev \
 		software-properties-common \
-		libgtk2.0-0 \
+		unzip \
+		wget \
+		# kernel packages
+		julia \
+		nodejs-legacy \
+		npm \
+		octave \
+		# other packages
+		ansible \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 # miniconda
 RUN wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/install_miniconda.sh \
  &&	bash /tmp/install_miniconda.sh -b -p /opt/conda \
- &&	conda update -y --all \
  && rm /tmp/install_miniconda.sh \
  && mkdir -p /opt/conda/var/lib/dbus/
 
-# jupyter
-RUN conda update conda
-conda install -y \
+# conda packages
+RUN conda update --all -y \
+ && conda install -y \
 		jupyter \
- && conda upgrade notebook -y \
- &&	pip install jupyterlab
+ && conda install -c conda-forge -y \
+		octave_kernel \
+ &&	conda install -c https://conda.binstar.org/menpo -y \
+		opencv3 \
+ && conda install -y \
+		bokeh \
+		matplotlib \
+		numpy \
+		scipy \
+		requests \
+		seaborn \
+ && conda update --all -y \
+ && conda clean --all -y
+
+# jupyter extensions
+RUN pip install --upgrade \
+		pip \
+ &&	pip install \
+		ipyparallel \
+		jupyterlab \
+		jupyterthemes \
+		jupyter-js-widgets-nbextension \
+		jupyter_contrib_nbextensions \
+		jupyter_nbextensions_configurator
 
 # Julia kernel
-RUN apt-get install -y \
-		julia \
- &&	julia -e 'Pkg.update()' \
+RUN julia -e 'Pkg.init()' \
+ && julia -e 'Pkg.update()' \
  &&	julia -e 'Pkg.add("DataFrames")' \
  &&	julia -e 'Pkg.add("Gadfly")' \
  &&	julia -e 'Pkg.add("GR")' \
@@ -46,10 +73,7 @@ RUN apt-get install -y \
  &&	julia -e 'Pkg.update()'
 
 # Node.js kernel
-RUN apt-get install -y \
-		nodejs-legacy \
-		npm \
- && git clone https://github.com/notablemind/jupyter-nodejs.git /usr/local/src/jupyter-nodejs \
+RUN git clone https://github.com/notablemind/jupyter-nodejs.git /usr/local/src/jupyter-nodejs \
  && cd /usr/local/src/jupyter-nodejs \
  && npm install \
  && node install.js \
@@ -57,10 +81,6 @@ RUN apt-get install -y \
  && npm run build-ext
 
 # Octave kernel
-RUN apt-get install -y \
-		octave \
- && conda install -y -c conda-forge\
-		octave_kernel
 ENV OCTAVE_EXECUTABLE=/usr/bin/octave
 
 # C++ kernel
@@ -91,26 +111,6 @@ RUN pip install bash_kernel \
 RUN curl -L https://github.com/krallin/tini/releases/download/v0.14.0/tini -o /usr/bin/tini \
  && chmod +x /usr/bin/tini
 
-# python packages
-RUN conda install -c https://conda.binstar.org/menpo -y \
-		opencv3 \
- && conda install -y \
-		matplotlib \
-		numpy \
-		seaborn
-
-# other packages
-RUN apt-get install -y \
-		ansible
-
-# jupyter extensions
-RUN pip install \
-		jupyter-js-widgets-nbextension \
-		jupyter_contrib_nbextensions \
-		jupyter_nbextensions_configurator \
-		ipyparallel \
-		jupyterthemes
-
 # jupyter setting
 RUN jt -t onedork -vim -fs 10 -nfs 11 -tfs 11 \
  && ipcluster nbextension enable \
@@ -118,9 +118,6 @@ RUN jt -t onedork -vim -fs 10 -nfs 11 -tfs 11 \
  &&	jupyter nbextension enable --py --sys-prefix widgetsnbextension \
  && jupyter contrib nbextension install \
  && jupyter serverextension enable --py jupyterlab --sys-prefix
-
-# clean caches
-
 
 
 ENTRYPOINT ["tini", "--", "jupyter"]
