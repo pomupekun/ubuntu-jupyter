@@ -1,6 +1,5 @@
 FROM ubuntu:zesty
 MAINTAINER pomupekun<pomupekun.gmail.com>
-# ENV PATH=/opt/conda/bin:/usr/local/lib/node_modules/ijavascript/bin:$PATH
 ENV PATH=/usr/local/bin:/opt/conda/bin:/usr/local/src/cling/bin:$PATH
 
 # common packages for build kernels
@@ -15,7 +14,9 @@ RUN apt-get update \
 		libzmq3-dev \
 		python-dev \
 		software-properties-common \
-		libgtk2.0-0
+		libgtk2.0-0 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # miniconda
 RUN wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/install_miniconda.sh \
@@ -25,28 +26,24 @@ RUN wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.s
  && mkdir -p /opt/conda/var/lib/dbus/
 
 # jupyter
-RUN conda install -y \
+RUN conda update conda
+conda install -y \
 		jupyter \
  && conda upgrade notebook -y \
  &&	pip install jupyterlab
 
-
 # Julia kernel
-#RUN apt-get install -y \
-#		julia && \
-#	julia -e 'Pkg.add("IJulia")'
-
-## ijavascript kernel
-#RUN apt-get clean && \
-#	apt-get update -y && \
-#	apt-get install -y \
-#		nodejs-legacy \
-#		apt-utils \
-#		npm \
-#		python-dev && \
-#	npm install -y -g ijavascript && \
-#	ijavascript.js --ijs-install-kernel
-#
+RUN apt-get install -y \
+		julia \
+ &&	julia -e 'Pkg.update()' \
+ &&	julia -e 'Pkg.add("DataFrames")' \
+ &&	julia -e 'Pkg.add("Gadfly")' \
+ &&	julia -e 'Pkg.add("GR")' \
+ &&	julia -e 'Pkg.add("IJulia")' \
+ &&	julia -e 'Pkg.add("Plots")' \
+ &&	julia -e 'Pkg.add("PyPlot")' \
+ &&	julia -e 'Pkg.add("RDatasets")' \
+ &&	julia -e 'Pkg.update()'
 
 # Node.js kernel
 RUN apt-get install -y \
@@ -80,11 +77,7 @@ RUN tar vxf /tmp/cling.tar.bz2 -C /tmp/ \
 RUN pip install bash_kernel \
  && python -m bash_kernel.install
 
-# PHP
-
-
-
-## PHP kernel
+# PHP kernel
 #RUN apt-get install -y \
 #		curl \
 #		php \
@@ -95,8 +88,8 @@ RUN pip install bash_kernel \
 #	rm /tmp/install_jupyter-php.phar
 
 # tini
-RUN curl -L https://github.com/krallin/tini/releases/download/v0.14.0/tini -o /usr/local/bin/tini \
- && chmod +x /usr/local/bin/tini
+RUN curl -L https://github.com/krallin/tini/releases/download/v0.14.0/tini -o /usr/bin/tini \
+ && chmod +x /usr/bin/tini
 
 # python packages
 RUN conda install -c https://conda.binstar.org/menpo -y \
@@ -106,14 +99,11 @@ RUN conda install -c https://conda.binstar.org/menpo -y \
 		numpy \
 		seaborn
 
+# other packages
+RUN apt-get install -y \
+		ansible
+
 # jupyter extensions
-# RUN conda install -y -c conda-forge \
-# 		jupyter_nbextensions_configurator \
-# 		jupyter_contrib_nbextensions \
-# 		ipyparallel \
-#  &&	pip install jupyterthemes
-
-
 RUN pip install \
 		jupyter-js-widgets-nbextension \
 		jupyter_contrib_nbextensions \
@@ -121,14 +111,17 @@ RUN pip install \
 		ipyparallel \
 		jupyterthemes
 
-# RUN jupyter serverextension enable --py jupyterlab --sys-prefix
-
 # jupyter setting
-RUN jt -t onedork -vim -fs 10 -nfs 10 -tfs 10 \
+RUN jt -t onedork -vim -fs 10 -nfs 11 -tfs 11 \
  && ipcluster nbextension enable \
  && jupyter nbextensions_configurator enable \
  &&	jupyter nbextension enable --py --sys-prefix widgetsnbextension \
- && jupyter contrib nbextension install
+ && jupyter contrib nbextension install \
+ && jupyter serverextension enable --py jupyterlab --sys-prefix
+
+# clean caches
+
+
 
 ENTRYPOINT ["tini", "--", "jupyter"]
 CMD ["--allow-root", "--ip=0.0.0.0"]
