@@ -8,7 +8,7 @@ ubuntu-jupyter:
   #stdin_open: true
   volumes:
      - ~/jupyter:/jupyter
-  command: ["notebook", "--ip=0.0.0.0", "--allow-root", "--notebook-dir=/jupyter/notebooks", "--config=/jupyter/conf/jupyter_notebook_config.py"]
+  command: ["notebook", "--ip=0.0.0.0", "--allow-root", "--notebook-dir=/jupyter/notebooks"]
   #command: ["notebook", "--ip=0.0.0.0", "--notebook-dir=/jupyter/notebooks"]
 
 

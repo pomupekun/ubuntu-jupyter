@@ -20,6 +20,8 @@ RUN apt-get update \
 		nodejs-legacy \
 		npm \
 		octave \
+		php \
+		php-zmq \
 		# other packages
 		ansible \
  && apt-get clean \
@@ -27,7 +29,7 @@ RUN apt-get update \
 
 # miniconda
 RUN wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/install_miniconda.sh \
- &&	bash /tmp/install_miniconda.sh -b -p /opt/conda \
+ && bash /tmp/install_miniconda.sh -b -p /opt/conda \
  && rm /tmp/install_miniconda.sh \
  && mkdir -p /opt/conda/var/lib/dbus/
 
@@ -37,7 +39,7 @@ RUN conda update --all -y \
 		jupyter \
  && conda install -c conda-forge -y \
 		octave_kernel \
- &&	conda install -c https://conda.binstar.org/menpo -y \
+ && conda install -c https://conda.binstar.org/menpo -y \
 		opencv3 \
  && conda install -y \
 		bokeh \
@@ -52,7 +54,7 @@ RUN conda update --all -y \
 # jupyter extensions
 RUN pip install --upgrade \
 		pip \
- &&	pip install \
+ && pip install \
 		ipyparallel \
 		jupyterlab \
 		jupyterthemes \
@@ -63,14 +65,14 @@ RUN pip install --upgrade \
 # Julia kernel
 RUN julia -e 'Pkg.init()' \
  && julia -e 'Pkg.update()' \
- &&	julia -e 'Pkg.add("DataFrames")' \
- &&	julia -e 'Pkg.add("Gadfly")' \
- &&	julia -e 'Pkg.add("GR")' \
- &&	julia -e 'Pkg.add("IJulia")' \
- &&	julia -e 'Pkg.add("Plots")' \
- &&	julia -e 'Pkg.add("PyPlot")' \
- &&	julia -e 'Pkg.add("RDatasets")' \
- &&	julia -e 'Pkg.update()'
+ && julia -e 'Pkg.add("DataFrames")' \
+ && julia -e 'Pkg.add("Gadfly")' \
+ && julia -e 'Pkg.add("GR")' \
+ && julia -e 'Pkg.add("IJulia")' \
+ && julia -e 'Pkg.add("Plots")' \
+ && julia -e 'Pkg.add("PyPlot")' \
+ && julia -e 'Pkg.add("RDatasets")' \
+ && julia -e 'Pkg.update()'
 
 # Node.js kernel
 RUN git clone https://github.com/notablemind/jupyter-nodejs.git /usr/local/src/jupyter-nodejs \
@@ -98,14 +100,10 @@ RUN pip install bash_kernel \
  && python -m bash_kernel.install
 
 # PHP kernel
-#RUN apt-get install -y \
-#		curl \
-#		php \
-#		php-zmq && \
-#	wget -q https://litipk.github.io/Jupyter-PHP-Installer/dist/jupyter-php-installer.phar -O /tmp/install_jupyter-php.phar && \
-#	curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin && \
-#	php /tmp/install_jupyter-php.phar install && \
-#	rm /tmp/install_jupyter-php.phar
+RUN wget -q https://litipk.github.io/Jupyter-PHP-Installer/dist/jupyter-php-installer.phar -O /tmp/install_jupyter-php.phar \
+ && curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin \
+ && php /tmp/install_jupyter-php.phar install \
+ && rm /tmp/install_jupyter-php.phar
 
 # tini
 RUN curl -L https://github.com/krallin/tini/releases/download/v0.14.0/tini -o /usr/bin/tini \
@@ -115,12 +113,11 @@ RUN curl -L https://github.com/krallin/tini/releases/download/v0.14.0/tini -o /u
 RUN jt -t onedork -vim -fs 10 -nfs 11 -tfs 11 \
  && ipcluster nbextension enable \
  && jupyter nbextensions_configurator enable \
- &&	jupyter nbextension enable --py --sys-prefix widgetsnbextension \
+ && jupyter nbextension enable --py --sys-prefix widgetsnbextension \
  && jupyter contrib nbextension install \
  && jupyter serverextension enable --py jupyterlab --sys-prefix
 
-
 ENTRYPOINT ["tini", "--", "jupyter"]
-CMD ["--allow-root", "--ip=0.0.0.0"]
+CMD ["notebook", "--allow-root", "--ip=*"]
 
 
